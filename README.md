@@ -7,21 +7,21 @@
 运行：
 
 ```bash
-dart run z1_dart_micro_multimodal_gpt/micro_multimodal_gpt.dart
+dart run bin/micro_multimodal_gpt.dart
 ```
 
 指定图片：
 
 ```bash
-dart run z1_dart_micro_multimodal_gpt/micro_multimodal_gpt.dart tree
-dart run z1_dart_micro_multimodal_gpt/micro_multimodal_gpt.dart house
-dart run z1_dart_micro_multimodal_gpt/micro_multimodal_gpt.dart cross
+dart run bin/micro_multimodal_gpt.dart tree
+dart run bin/micro_multimodal_gpt.dart house
+dart run bin/micro_multimodal_gpt.dart cross
 ```
 
 快速验证：
 
 ```bash
-Z1_DART_MM_GPT_STEPS=20 dart run z1_dart_micro_multimodal_gpt/micro_multimodal_gpt.dart sun
+Z1_DART_MM_GPT_STEPS=20 dart run bin/micro_multimodal_gpt.dart sun
 ```
 
 默认训练 200 步，通常几秒内可以跑完。步数太少时模型可能答错，这正好可以观察“还没学会”的状态。
@@ -47,17 +47,17 @@ Z1_DART_MM_GPT_STEPS=20 dart run z1_dart_micro_multimodal_gpt/micro_multimodal_g
 
 ## 最小算法骨架
 
-| 代码里的东西 | 多模态 GPT / VLM 里的概念 | 意思 |
-| --- | --- | --- |
-| `ImageGrid.rows` | 原始图像 | 这里用 0/1 像素代替真实图片 |
-| `patches()` | image patching | 把图片切成小块，类似 ViT 的 patch |
-| `vision_proj` | 视觉投影层 | 把每个 patch 的像素变成 embedding |
-| `TinyTokenizer` | text tokenizer | 把问题和答案切成字符 token |
-| `wme` | modality embedding | 告诉模型这个 token 来自图片还是文字 |
-| `wpe` | position embedding | 告诉模型 token 在序列里的位置 |
-| `forward()` | GPT 前向传播 | self-attention + MLP + lm head |
-| `answerTargets()` | 训练目标 | 用上一个 token 预测下一个答案 token |
-| `generate()` | 自回归解码 | 每次预测一个字，直到 `<eos>` |
+| 代码里的东西            | 多模态 GPT / VLM 里的概念 | 意思                             |
+|-------------------|--------------------|--------------------------------|
+| `ImageGrid.rows`  | 原始图像               | 这里用 0/1 像素代替真实图片               |
+| `patches()`       | image patching     | 把图片切成小块，类似 ViT 的 patch         |
+| `vision_proj`     | 视觉投影层              | 把每个 patch 的像素变成 embedding      |
+| `TinyTokenizer`   | text tokenizer     | 把问题和答案切成字符 token               |
+| `wme`             | modality embedding | 告诉模型这个 token 来自图片还是文字          |
+| `wpe`             | position embedding | 告诉模型 token 在序列里的位置             |
+| `forward()`       | GPT 前向传播           | self-attention + MLP + lm head |
+| `answerTargets()` | 训练目标               | 用上一个 token 预测下一个答案 token       |
+| `generate()`      | 自回归解码              | 每次预测一个字，直到 `<eos>`             |
 
 ## 和纯文字 GPT 的关系
 
