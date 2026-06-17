@@ -55,9 +55,12 @@ class Value {
 
   Value operator -(Object other) => this + (-_asValue(other));
 
+  // pow 是 power 的缩写，表示“幂运算”。x.pow(-1.0) 就是 x 的 -1 次方，
+  // 等价于 1 / x，所以这里用“乘以倒数”来实现除法。
   Value operator /(Object other) => this * _asValue(other).pow(-1.0);
 
   Value pow(double exponent) {
+    // data^exponent，同时记录导数：d(x^n)/dx = n * x^(n - 1)，供反向传播使用。
     final out = math.pow(data, exponent).toDouble();
     final localGrad = exponent * math.pow(data, exponent - 1).toDouble();
     return Value(out, <Value>[this], <double>[localGrad]);
@@ -351,6 +354,7 @@ List<Value> softmax(List<Value> logits) {
 
 List<Value> rmsnorm(List<Value> x) {
   final ms = sumValues([for (final xi in x) xi * xi]) / x.length;
+  // (ms + eps)^(-0.5) 等价于 1 / sqrt(ms + eps)，用于把向量按 RMS 缩放。
   final scale = (ms + 1e-5).pow(-0.5);
   return [for (final xi in x) xi * scale];
 }
@@ -521,6 +525,7 @@ void train(List<TrainingExample> examples, int steps) {
       m[i] = beta1 * m[i] + (1.0 - beta1) * p.grad;
       v[i] = beta2 * v[i] + (1.0 - beta2) * p.grad * p.grad;
 
+      // beta^(step + 1) 表示衰减系数累计乘了多少轮，用于 Adam 的偏差修正。
       final mHat = m[i] / (1.0 - math.pow(beta1, step + 1));
       final vHat = v[i] / (1.0 - math.pow(beta2, step + 1));
       p.data -= lrT * mHat / (math.sqrt(vHat) + epsAdam);
